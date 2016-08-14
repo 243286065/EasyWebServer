@@ -25,5 +25,7 @@
 #define EW_EXIT_EPOLL_DEL_ERR		13
 #define EW_EXIT_EPOLL_WAIT_ERR		14
 #define EW_EXIT_SIGCHLD_ERR			15
+#define EW_EXIT_MSGGET_ERR			16
+#define EW_EXIT_MSGSENT_ERR			17
 
 #endif /* EW_EXIT_STATUS_H_ */

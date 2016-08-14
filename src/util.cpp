@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 
 /*show the program version*/
 void showVersion() {
@@ -204,7 +205,7 @@ time_t time_convert_to_timet(ew_string& time_char) {
 }
 
 /*convert time(time_t) to time value(char*)*/
-void timet_convert_to_chars(time_t& time_s, char* buf,int len) {
+void timet_convert_to_chars(time_t& time_s, char* buf, int len) {
 	struct tm tm;
 	localtime_r(&time_s, &tm);
 	//fprintf(stderr,"convert:%d %d\n",time_s,len);
@@ -220,5 +221,10 @@ int compare_time(time_t &t1, time_t &t2) {
 		return 1;
 	else
 		return 0;
+}
+
+/*get current time(sec)*/
+time_t get_current_time_sec() {
+	return time((time_t*) NULL);
 }
 
