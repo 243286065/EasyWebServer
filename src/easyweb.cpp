@@ -14,11 +14,13 @@ using namespace std;
 #include <unistd.h>
 #include <sched.h>
 #include <sys/sysinfo.h>
+#include <pthread.h>
 #include <errno.h>
 #include <vector>
 
 #include "util.h"
 #include "ew_http_util.h"
+#include "log.h"
 
 #define CONF_FILE_DEFAULT   "./easyweb.conf"
 #define MAX_EVENTS			1024
@@ -27,6 +29,7 @@ using namespace std;
 ew_init_config conf;
 vector<pid_t> sub_process_list; //store sub worker process PID
 char buf[BUF_SIZE_BIG];
+char log_buf[BUF_SIZE_SMALL];
 
 /*Load opt command and config file*/
 static void init(int argc, char* argv[]) {
@@ -36,6 +39,8 @@ static void init(int argc, char* argv[]) {
 	}
 	read_conf(conf);
 	showInfo_start(conf);
+	//init msg
+	msg_init();
 }
 
 /*deal child process exit signal*/
@@ -64,6 +69,9 @@ void sig_int(int signo) {
 
 /*worker process handler*/
 void worker(int);
+
+/*master process job--log*/
+void* log(void*);
 
 int main(int argc, char* argv[]) {
 	//Load opt command and config file
@@ -106,12 +114,20 @@ int main(int argc, char* argv[]) {
 	if (conf.get_processorNum() == 0) {
 		worker(serverFd);
 	}
+
+	pthread_t id;
+	if (pthread_create(&id, NULL, log, NULL) < 0) {
+		exit(EW_PTHREAD_CREATE_ERR);
+	}
 	while (1) {
 		//fprintf(stdout,"EasyWeb-> [INFO] master process chcek \n");
 		sleep(10);
 	}
-
 	return EW_EXIT_OK;
+}
+
+void* log(void*) {
+	log_info_recv(conf);
 }
 
 /*worker process handler*/
@@ -155,10 +171,10 @@ void worker(int serverFd) {
 						&add_len)) > 0) {
 					if (clientFd <= 0) {
 						//log
-						fprintf(
-								stderr,
-								"EasyWeb-> [ERROR]socket accpet failed by woker process:%d \n",
-								pid);
+						//						fprintf(
+						//								stderr,
+						//								"EasyWeb-> [ERROR]socket accpet failed by woker process:%d \n",
+						//								pid);
 						continue;
 					}
 					/*set client socket un-blocking*/
@@ -170,10 +186,9 @@ void worker(int serverFd) {
 							new ew_http_request_class(clientFd);
 					event_t.data.ptr = (void*) new_http_rq;
 					ew_epoll_add(epollFd, new_http_rq->fd, &event_t);
-					fprintf(
-							stdout,
-							"EasyWeb-> [INFO] new connection from [%s] by woker process:%d \n",
-							inet_ntoa(clientaddr.sin_addr), pid);
+					sprintf(log_buf, "new connection from [%s]", inet_ntoa(
+							clientaddr.sin_addr));
+					log_info_send("INFO", log_buf);
 				}
 			} else if ((event_t.events & EPOLLERR) || (event_t.events
 					&EPOLLHUP)) {

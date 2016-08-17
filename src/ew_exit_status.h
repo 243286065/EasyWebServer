@@ -27,5 +27,7 @@
 #define EW_EXIT_SIGCHLD_ERR			15
 #define EW_EXIT_MSGGET_ERR			16
 #define EW_EXIT_MSGSENT_ERR			17
-
+#define EW_EXIT_MSGRECV_ERR			18
+#define EW_EXIT_MSGRMID_ERR			19
+#define EW_PTHREAD_CREATE_ERR		20
 #endif /* EW_EXIT_STATUS_H_ */
