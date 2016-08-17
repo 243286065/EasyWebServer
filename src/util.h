@@ -68,7 +68,6 @@ void timet_convert_to_chars(time_t&,char*,int);
 /*compare two time value.*/
 int compare_time(time_t &,time_t &);
 
-/*get current time(sec)*/
 time_t get_current_time_sec();
 
 #endif /* UTIL_H_ */

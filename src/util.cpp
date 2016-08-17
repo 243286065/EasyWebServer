@@ -223,7 +223,7 @@ int compare_time(time_t &t1, time_t &t2) {
 		return 0;
 }
 
-/*get current time(sec)*/
+
 time_t get_current_time_sec() {
 	return time((time_t*) NULL);
 }
