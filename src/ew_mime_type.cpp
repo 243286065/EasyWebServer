@@ -50,7 +50,7 @@ ew_mime_type_class& get_mime_types() {
 const char* find_type(const char* filename) {
 	init_types();
 	const char* pos = strrchr(filename, '.');
-	const char* rs=mime_type.findType(const_cast<char*>(pos),strlen(pos));
+	const char* rs = mime_type.findType(const_cast<char*> (pos), strlen(pos));
 	//fprintf(stdout, "11111\n");
 	//fprintf(stdout, "%s\n", types[pos]);
 	//return mime_type.findType(pos,strlen(pos));

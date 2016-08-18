@@ -25,7 +25,6 @@
 #define BUF_SIZE_BIG		1024
 #define BUF_SIZE_MAXSIZE	(16*1024)
 
-
 /*show the program version*/
 void showVersion();
 
@@ -45,28 +44,28 @@ void make_socket_non_blocking(int);
 int open_socket_listen(ew_init_config&);
 
 /*convert string(char*) to lowercase*/
-void convert_lowerCase(char*,int len);
+void convert_lowerCase(char*, int len);
 
 /*string class*/
-class ew_string{
+class ew_string {
 public:
-	int len;	//char size, not include '\0'
+	int len; //char size, not include '\0'
 	const char* pos;
-	ew_string(const char*,int);
-	void trim();	//remove the blank space
+	ew_string(const char*, int);
+	void trim(); //remove the blank space
 };
 
 /*send data to client*/
-void send_data(int fd,char* buf);
+void send_data(int fd, char* buf);
 
 /*convert time(char*) to time value(time_t)*/
 time_t time_convert_to_timet(ew_string&);
 
 /*convert time(time_t) to time value(char*)*/
-void timet_convert_to_chars(time_t&,char*,int);
+void timet_convert_to_chars(time_t&, char*, int);
 
 /*compare two time value.*/
-int compare_time(time_t &,time_t &);
+int compare_time(time_t &, time_t &);
 
 time_t get_current_time_sec();
 

@@ -17,9 +17,9 @@
 
 #define BUF_SIZE	128
 
-struct msg_st{
+struct msg_st {
 	long msg_type;
-	char msg[BUF_SIZE];			//info text
+	char msg[BUF_SIZE]; //info text
 };
 
 static int msgid;
@@ -31,7 +31,7 @@ void msg_init();
 /**
  * type:"ERROR"|"INFO"|"WARNING"
  */
-void log_info_send(const char* type,const char* log);
+void log_info_send(const char* type, const char* log);
 
 /*recive log info*/
 void log_info_recv(ew_init_config& conf);

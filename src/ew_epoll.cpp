@@ -21,12 +21,12 @@ int ew_epoll_create(int flags) {
 		//log
 		exit(EW_EXIT_EPOLL_CREATE1_ERR);
 	}
-//	events = (struct epoll_event*) malloc(sizeof(struct epoll_event)
-//			* MAXEVENTS);
-//	if (events == NULL) {
-//		//log
-//		exit(EW_EXIT_EPOLL_MALLOC_ERR);
-//	}
+	//	events = (struct epoll_event*) malloc(sizeof(struct epoll_event)
+	//			* MAXEVENTS);
+	//	if (events == NULL) {
+	//		//log
+	//		exit(EW_EXIT_EPOLL_MALLOC_ERR);
+	//	}
 	return fd;
 }
 
@@ -55,9 +55,10 @@ void ew_epoll_del(int epollFd, int fd, struct epoll_event *event) {
 	int rs = epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, event);
 	if (rs < 0) {
 		//log
-		fprintf(stderr,
+		fprintf(
+				stderr,
 				"EasyWeb-> [ERROR]epoll_del [FD:%d] failed by woker process:%d \n",
-				fd,getpid());
+				fd, getpid());
 		perror("EPOLL_CTL_DEL ERR:");
 		exit(EW_EXIT_EPOLL_DEL_ERR);
 	}

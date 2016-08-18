@@ -14,9 +14,9 @@
 #define TIMEOUT		10
 
 int ew_epoll_create(int);
-void ew_epoll_add(int,int,struct epoll_event *);
-void ew_epoll_modify(int,int,struct epoll_event *);
-void ew_epoll_del(int,int,struct epoll_event *);
-int ew_epoll_wait(int,struct epoll_event *,int,int);
+void ew_epoll_add(int, int, struct epoll_event *);
+void ew_epoll_modify(int, int, struct epoll_event *);
+void ew_epoll_del(int, int, struct epoll_event *);
+int ew_epoll_wait(int, struct epoll_event *, int, int);
 
 #endif /* EW_EPOLL_H_ */

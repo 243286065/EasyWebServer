@@ -13,8 +13,8 @@
 
 typedef void (*timer_handler_func)(int fd);
 
-typedef struct ew_timer_node_s{
-	size_t key;		//time value
+typedef struct ew_timer_node_s {
+	size_t key; //time value
 
 	timer_handler_func handler;
 } ew_timer_node;
@@ -26,7 +26,5 @@ size_t ew_find_timer();
 
 /*update timer*/
 void ew_timer_update();
-
-
 
 #endif /* EW_TIMER_H_ */
