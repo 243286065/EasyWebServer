@@ -11,12 +11,12 @@
 
 /*init msg queue*/
 void msg_init() {
-	msgid = msgget((key_t) 1234, 0666 | IPC_CREAT);
+	msgid = msgget((key_t) 123456, 0666 | IPC_CREAT);
 	//delete for clear msg
 	if (msgctl(msgid, IPC_RMID, 0) == -1) {
 		exit(EW_EXIT_MSGRMID_ERR);
 	}
-	msgid = msgget((key_t) 1234, 0666 | IPC_CREAT);
+	msgid = msgget((key_t) 123456, 0666 | IPC_CREAT);
 }
 
 /*send log info*/

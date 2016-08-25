@@ -227,3 +227,27 @@ time_t get_current_time_sec() {
 	return time((time_t*) NULL);
 }
 
+static void copy_argv_envir(int argc,char* argv[]){
+	extern char **environ;
+	int i,size=0;
+	char* last=argv[argc-1]+strlen(argv[argc-1])+1;
+	memset(argv[0],0,last-argv[0]+1);
+	for(i=0;environ[i];i++){
+		//fprintf(stderr,"%s\n",environ[i]);
+		size+=strlen(environ[i])+1;
+	}
+	char* p=(char*)malloc(size);
+	char* q=p;
+	for(i=0;environ[i];i++){
+		strcpy(q,environ[i]);
+		environ[i]=q;
+		q+=strlen(environ[i])+1;
+	}
+}
+
+/*rename process*/
+void rename_proc_title(int argc,char* argv[],const char* title){
+	copy_argv_envir(argc,argv);
+	strcpy(argv[0],title);
+}
+

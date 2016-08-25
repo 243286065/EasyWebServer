@@ -14,8 +14,8 @@
 ew_init_config::ew_init_config() :
 	conf_file(NULL), log_file(NULL), root_dir(NULL), threadnum(0),
 			maxConnect(0), port(0) {
-	processorNum = get_nprocs();
-	//processorNum=1;
+	//processorNum = get_nprocs();
+	processorNum=1;
 }
 
 static char* new_set_method_chars(char* loc, const char* get) {

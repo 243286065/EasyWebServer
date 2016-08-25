@@ -21,3 +21,6 @@ aux_source_directory(./src SRC)	#将子目录src下的源文件保存到变量SR
 
 #编译可执行文件
 ADD_EXECUTABLE(EasyWebServer ${SRC})
+
+#加载动态链接库
+TARGET_LINK_LIBRARIES(EasyWebServer pthread)

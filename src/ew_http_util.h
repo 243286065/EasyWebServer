@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <map>
+#include <vector>
 #include "util.h"
 #include "ew_init_config_class.h"
 
@@ -42,7 +43,9 @@ public:
 	int respond_code;
 	std::string content_type;
 	int keep_alive;
-	ew_http_respond_class(std::string& filename_s, time_t rq_time);
+	off_t size_sent;
+	int &statu;
+	ew_http_respond_class(std::string& filename_s, time_t rq_time,int &_statu);
 	void send_respond_head(int fd);
 	void sendfile_respond_body(int fd); //send file by sendfile
 	void send_respond(int fd); //send respond
@@ -58,11 +61,14 @@ public:
 	ew_string *uri;
 	ew_string *method;
 	ew_string *http_protocol;
+	ew_string *refer;
+	std::string file_type;
+	std::vector<std::string> param;
 	int keepalive; //mark
 	time_t value_IF_MODIFILE_SINCE;
 
 	ew_http_respond_class *respond;
-
+	int statu;	//0:new request;1:sending data;2:has done
 	ew_http_request_class(int sockfd);
 	void http_request_init(char* buf_chars);
 	void http_request_head_parser(ew_init_config& conf); //init members

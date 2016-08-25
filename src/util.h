@@ -69,4 +69,7 @@ int compare_time(time_t &, time_t &);
 
 time_t get_current_time_sec();
 
+/*rename process*/
+void rename_proc_title(int argc,char* argv[],const char* title);
+
 #endif /* UTIL_H_ */

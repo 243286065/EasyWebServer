@@ -66,8 +66,8 @@ void send_respond_head_common(int code, std::string& content_type,
 }
 
 ew_http_respond_class::ew_http_respond_class(std::string& filename_s,
-		time_t rq_time) :
-	filename(filename_s), keep_alive(0) {
+		time_t rq_time, int &_statu) :
+	filename(filename_s), keep_alive(0), size_sent(0), statu(_statu) {
 
 	int rs = stat(filename.c_str(), &file_info);
 	if (rs == -1) {
@@ -102,29 +102,34 @@ void ew_http_respond_class::send_respond_head(int fd) {
 void ew_http_respond_class::send_respond(int fd) {
 	//char* body=new char[BUF_SIZE_BIG*4];		//read 4KB data
 	//delete[] body;
-	send_respond_head(fd);
+	if (statu == 0) {
+		send_respond_head(fd);
+		statu = 1;
+	}
+	//fprintf(stderr,"---statu=%d\n",statu);
 	switch (respond_code) {
 	case EW_HTTP_OK:
 		sendfile_respond_body(fd);
 		break;
 	default:
 		send_special_page_body(fd, respond_code);
+		statu = 2;
 		break;
 	}
 }
 
 void ew_http_respond_class::sendfile_respond_body(int fd) {
+	ssize_t off = sendfile(fd, file_fd, &size_sent, file_info.st_size);
 
-	sendfile(fd, file_fd, NULL, file_info.st_size);
-	close(file_fd);
-	//	if (keep_alive == 0) {
-	//		close(fd);
-	//	}
+	if (size_sent >= file_info.st_size) {
+		close(file_fd);
+		statu = 2;
+	}
 }
 
 ew_http_request_class::ew_http_request_class(int sockfd) :
 	fd(sockfd), buf_s(NULL), buf(NULL), uri(NULL), method(NULL), respond(NULL),
-			http_protocol(NULL) {
+			http_protocol(NULL), refer(NULL), statu(0) {
 }
 
 ew_http_request_class::~ew_http_request_class() {
@@ -133,6 +138,7 @@ ew_http_request_class::~ew_http_request_class() {
 	delete uri;
 	delete method;
 	delete http_protocol;
+	delete refer;
 }
 
 void ew_http_request_class::http_request_init(char* buf_chars) {
@@ -141,7 +147,10 @@ void ew_http_request_class::http_request_init(char* buf_chars) {
 }
 
 void ew_http_request_class::http_request_head_parser(ew_init_config& conf) {
-	const char* pos, *nextpos;
+	if (statu == 1)
+		return;
+	const char* pos, *nextpos, *tmp = NULL;
+	bool auto_spit = false;
 	int len = 0;
 	pos = buf;
 	while (*pos == ' ') {
@@ -160,9 +169,18 @@ void ew_http_request_class::http_request_head_parser(ew_init_config& conf) {
 	len = pos - buf;
 	nextpos = pos;
 	while (*nextpos != ' ') {
+		if (*nextpos == '?') {
+			tmp = nextpos;
+		} else if (*nextpos == '.') {
+			auto_spit = true;
+		}
 		nextpos++;
 	}
-	uri = new ew_string(buf + len, nextpos - pos);
+	if (tmp) {
+		uri = new ew_string(buf + len, tmp - pos);
+	} else {
+		uri = new ew_string(buf + len, nextpos - pos);
+	}
 	pos = nextpos;
 	while (*pos == ' ') {
 		pos++;
@@ -187,24 +205,50 @@ void ew_http_request_class::http_request_head_parser(ew_init_config& conf) {
 			tmp_pos++;
 		}
 		nextpos = tmp_pos;
-		nextpos++;
 		while (*nextpos != '\r') {
 			nextpos++;
 		}
 		ew_string time_since(tmp_pos, nextpos - tmp_pos);
 		value_IF_MODIFILE_SINCE = time_convert_to_timet(time_since);
 	}
-
+	const char* refer_pos;
+	if ((refer_pos = strstr(pos, "Referer:"))) {
+		refer_pos += strlen("Referer: http");
+		refer_pos += 3;
+		refer_pos = strchr(refer_pos, '/');
+		++refer_pos;
+		nextpos = refer_pos;
+		while (*nextpos != '\r') {
+			nextpos++;
+		}
+		refer = new ew_string(const_cast<char*> (refer_pos), nextpos
+				- refer_pos);
+	}
 	filename = std::string(conf.get_root_dir()) + std::string(uri->pos,
 			uri->len);
+
 	if (filename[filename.size() - 1] == '/') {
 		std::string tmp = filename + "index.html";
 		if (access(tmp.c_str(), F_OK) == -1) {
 			tmp = filename + "index.php";
 		}
 		filename = tmp;
+	} else if (!auto_spit) {
+		fprintf(stderr, "-------------------------------\n");
+		if (refer_pos) {
+			filename = std::string(conf.get_root_dir()) + "/" + std::string(
+					refer->pos, refer->len) + std::string(uri->pos, uri->len);
+		}
+		std::string tmp = filename + "/index.html";
+		if (access(tmp.c_str(), F_OK) == -1) {
+			tmp = filename + "/index.php";
+		}
+		filename = tmp;
 	}
-	respond = new ew_http_respond_class(filename, value_IF_MODIFILE_SINCE);
+	int pos_index = filename.rfind('.');
+	file_type = filename.substr(pos_index);
+	respond = new ew_http_respond_class(filename, value_IF_MODIFILE_SINCE,
+			statu);
 	respond->keep_alive = keepalive;
 }
 

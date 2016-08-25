@@ -105,12 +105,14 @@ int main(int argc, char* argv[]) {
 			if (sched_setaffinity(0, sizeof(mask), &mask) < 0) {
 				perror("sched_setaffinity");
 			}
+			rename_proc_title(argc,argv,"EasyWebServer worker");
 			worker(serverFd);
 			return EW_EXIT_OK;
 		}
 		sub_process_list.push_back(pid);
 	}
 	/*parent process*/
+	rename_proc_title(argc,argv,"EasyWebServer master");
 	if (conf.get_processorNum() == 0) {
 		worker(serverFd);
 	}
@@ -242,7 +244,6 @@ void worker(int serverFd) {
 				}
 				if (event_t.events & EPOLLOUT) {
 					/*send data*/
-					//fprintf(stdout, "EPOLLOUT	%d\n", pid);
 					//ew_http_request_class *rq =
 					//		(ew_http_request_class *) (events[i].data.ptr);
 					int fd = rq->fd;
@@ -275,9 +276,12 @@ void worker(int serverFd) {
 					rq->http_request_head_parser(conf);
 					rq->http_request_send_respond();
 					//fprintf(stderr,"3[FD:%d]\n",fd);
-					ew_epoll_del(epollFd, fd, &(event_t));
-					close(fd);
-					delete rq;
+					//fprintf(stderr,"！！！statu=%d\n",rq->statu);
+					if(rq->statu==2){
+						ew_epoll_del(epollFd, fd, &(event_t));
+						close(fd);
+						delete rq;
+					}
 				}
 			}
 		}
